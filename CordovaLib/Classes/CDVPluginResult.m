@@ -37,7 +37,7 @@ id messageFromArrayBuffer(NSData* data)
 {
     return @{
                @"CDVType" : @"ArrayBuffer",
-               @"data" :[data cdv_base64EncodedString]
+               @"data" :[data base64Encoding]
     };
 }
 
@@ -166,28 +166,30 @@ id messageFromMultipart(NSArray* theMessages)
 // These methods are used by the legacy plugin return result method
 - (NSString*)toJSONString
 {
-    NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:
-        self.status, @"status",
-        self.message ? self.                                message:[NSNull null], @"message",
-        self.keepCallback, @"keepCallback",
-        nil];
+    @autoreleasepool {
+        NSDictionary* dict = [NSDictionary dictionaryWithObjectsAndKeys:
+            self.status, @"status",
+            self.message ? self.                                message:[NSNull null], @"message",
+            self.keepCallback, @"keepCallback",
+            nil];
 
-    NSError* error = nil;
-    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:dict
+        NSError* error = nil;
+        NSData* jsonData = [NSJSONSerialization dataWithJSONObject:dict
                                                        options:NSJSONWritingPrettyPrinted
                                                          error:&error];
-    NSString* resultString = nil;
+        NSString* resultString = nil;
 
-    if (error != nil) {
-        NSLog(@"toJSONString error: %@", [error localizedDescription]);
-    } else {
-        resultString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    }
+        if (error != nil) {
+            NSLog(@"toJSONString error: %@", [error localizedDescription]);
+        } else {
+            resultString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        }
 
-    if ([[self class] isVerbose]) {
-        NSLog(@"PluginResult:toJSONString - %@", resultString);
+        if ([[self class] isVerbose]) {
+            NSLog(@"PluginResult:toJSONString - %@", resultString);
+        }
+        return resultString;
     }
-    return resultString;
 }
 
 - (NSString*)toSuccessCallbackString:(NSString*)callbackId
